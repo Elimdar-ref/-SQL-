@@ -3,10 +3,13 @@ package ru.hogwarts.school.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
+import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 
 @RestController
@@ -14,9 +17,11 @@ import java.util.Collections;
 public class FacultyController {
 
     private final FacultyService facultyService;
+    private final StudentService studentService;
 
-    public FacultyController(FacultyService facultyService) {
+    public FacultyController(FacultyService facultyService, StudentService studentService) {
         this.facultyService = facultyService;
+        this.studentService = studentService;
     }
 
     @GetMapping("{id}")
@@ -55,4 +60,25 @@ public class FacultyController {
         }
         return ResponseEntity.ok(Collections.emptyList());
     }
+
+    @GetMapping("/faculties")
+    public ResponseEntity<List<Faculty>> searchFaculties(@RequestParam(value = "search", required = false) String searchTerm) {
+        List<Faculty> faculties = facultyService.searchFaculties(searchTerm);
+        if (faculties.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(faculties);
+    }
+
+    @GetMapping("/{facultyId}/students")
+    public ResponseEntity<List<Student>> getFacultyStudents(@PathVariable Long facultyId) {
+        List<Student> students = studentService.getFacultyStudents(facultyId);
+        if (students.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(students);
+    }
+
 }

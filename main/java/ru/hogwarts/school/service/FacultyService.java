@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -39,5 +40,17 @@ public class FacultyService {
         return facultyRepository.findAll().stream()
                 .filter(faculty -> Objects.equals(faculty.getColor(), color))
                 .collect(Collectors.toList());
+    }
+
+    public List<Faculty> searchFaculties(String searchTerm) {
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return facultyRepository.findAll();
+        }
+        return facultyRepository.findByNameOrColorContainsIgnoreCase(searchTerm, searchTerm);
+    }
+
+    public Faculty getFacultyById(Long id) {
+        return facultyRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Faculty not found with id: " + id));
     }
 }
