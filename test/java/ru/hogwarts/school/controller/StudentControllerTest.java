@@ -50,17 +50,23 @@ public class StudentControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private Student createStudent(Long id, String name, int age) {
+        Student student = new Student(id, name, age);
+        return student;
+    }
+
+    private final Student student = createStudent(1L, "Егор", 20);
+
     @Test
     void getStudentInfo_shouldReturnStudent_whenStudentExists() throws Exception {
-        Student student = new Student(1L, "Егор", 20);
 
-        when(studentService.findStudent(1L)).thenReturn(student);
+        when(studentService.findStudent(student.getId())).thenReturn(student);
 
         mockMvc.perform(get("/student/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Егор"))
-                .andExpect(jsonPath("$.age").value(20));
+                .andExpect(jsonPath("$.id").value(student.getId()))
+                .andExpect(jsonPath("$.name").value(student.getName()))
+                .andExpect(jsonPath("$.age").value(student.getAge()));
     }
 
     @Test
@@ -74,44 +80,46 @@ public class StudentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newStudent)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(3))
-                .andExpect(jsonPath("$.name").value("Алексей"))
-                .andExpect(jsonPath("$.age").value(25));
+                .andExpect(jsonPath("$.id").value(savedStudent.getId()))
+                .andExpect(jsonPath("$.name").value(savedStudent.getName()))
+                .andExpect(jsonPath("$.age").value(savedStudent.getAge()));
     }
 
     @Test
     void deleteStudent_shouldDeleteStudent() throws Exception {
         when(studentRepository.existsById(1L)).thenReturn(true);
 
-        mockMvc.perform(delete("/student/1"))
+        mockMvc.perform(delete("/student/{id}", student.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
     void findStudent_shouldReturnStudents_whenAgeGreaterThan18() throws Exception {
+        int searchAge = 20;
         List<Student> students = Arrays.asList(
-                new Student(1L, "Егор", 20),
-                new Student(2L, "Мария", 25));
+                new Student(1L, "Егор", searchAge),
+                new Student(2L, "Мария", searchAge + 1));
 
-        when(studentService.findByAge(20)).thenReturn(students);
+        when(studentService.findByAge(searchAge)).thenReturn(students);
 
-        mockMvc.perform(get("/student/age").param("age", "20"))
+        mockMvc.perform(get("/student/age").param("age", String.valueOf(searchAge)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].age").value(20))
-                .andExpect(jsonPath("$[1].age").value(25));
+                .andExpect(jsonPath("$.length()").value(students.size()))
+                .andExpect(jsonPath("$[0].age").value(students.get(0).getAge()))
+                .andExpect(jsonPath("$[1].age").value(students.get(1).getAge()));
     }
 
     @Test
     void getStudentFaculty_shouldReturnFaculty() throws Exception {
+        Long studentId = 1L;
         Faculty faculty = new Faculty(1L, "ПК", "Красный");
 
-        when(studentService.getStudentFaculty(1L)).thenReturn(faculty);
+        when(studentService.getStudentFaculty(studentId)).thenReturn(faculty);
 
-        mockMvc.perform(get("/student/1/faculty"))
+        mockMvc.perform(get("/student/{studentId}/faculty", studentId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("ПК"))
-                .andExpect(jsonPath("$.color").value("Красный"));
+                .andExpect(jsonPath("$.id").value(faculty.getId()))
+                .andExpect(jsonPath("$.name").value(faculty.getName()))
+                .andExpect(jsonPath("$.color").value(faculty.getColor()));
     }
 }
