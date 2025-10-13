@@ -9,6 +9,7 @@ import ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -81,4 +82,11 @@ public class FacultyController {
         return ResponseEntity.ok(students);
     }
 
+    @GetMapping("/faculty/longest-name")
+    public String getFacultyWithLongestName() {
+        return facultyService.findAll().stream()
+                .map(Faculty::getName)
+                .max(Comparator.comparing(String::length))
+                .orElse("Факультеты не найдены");
+    }
 }

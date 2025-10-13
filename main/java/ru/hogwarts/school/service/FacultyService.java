@@ -53,4 +53,8 @@ public class FacultyService {
         return facultyRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Faculty not found with id: " + id));
     }
+
+    public List<Faculty> findAll() {
+        return facultyRepository.findAll();
+    }
 }

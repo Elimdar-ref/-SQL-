@@ -1,5 +1,7 @@
 package ru.hogwarts.school.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
@@ -10,16 +12,24 @@ import ru.hogwarts.school.service.StudentService;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 
 @RestController
 @RequestMapping("/student")
 public class StudentController {
 
+    Logger logger = LoggerFactory.getLogger(StudentService.class);
+
     private final StudentService studentService;
 
-    public StudentController(StudentService studentService) {
+    private final StudentRepository studentRepository;
+
+    public StudentController(StudentService studentService,
+                             StudentRepository studentRepository) {
         this.studentService = studentService;
+        this.studentRepository = studentRepository;
     }
 
     @GetMapping("{id}")
@@ -92,5 +102,35 @@ public class StudentController {
     public ResponseEntity<List<Student>> getLastFiveStudents() {
         List<Student> students = studentService.getLastFiveStudents();
         return ResponseEntity.ok(students);
+    }
+
+    @GetMapping("/names-starting-with-a")
+    public List<String> getStudentNamesStartingWithA() {
+        return studentRepository.findAll().stream()
+                .map(Student::getName)
+                .filter(name -> name.startsWith("А"))
+                .map(String::toUpperCase)
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/averageAge")
+    public double getAverageStudentAge() {
+        return studentRepository.findAll().stream()
+                .mapToDouble(Student::getAge)
+                .average()
+                .orElse(0);
+    }
+
+    @GetMapping("/sum-parallel")
+    public ResponseEntity<Long> calculateSumParallel() {
+        logger.info("Был вызван метод для вычисления суммы с использованием параллельного потока");
+        long startTime = System.currentTimeMillis();
+        long sum = LongStream.rangeClosed(1, 1_000_000)
+                .parallel()
+                .sum();
+        long endTime = System.currentTimeMillis();
+        logger.debug("Параллельный расчёт завершён за {} мс. Результат: {}", (endTime - startTime), sum);
+        return ResponseEntity.ok(sum);
     }
 }
