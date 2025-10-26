@@ -20,7 +20,7 @@ import java.util.stream.LongStream;
 @RequestMapping("/student")
 public class StudentController {
 
-    Logger logger = LoggerFactory.getLogger(StudentService.class);
+    private final Logger logger = LoggerFactory.getLogger(StudentController.class);
 
     private final StudentService studentService;
 

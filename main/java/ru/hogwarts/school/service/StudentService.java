@@ -20,7 +20,7 @@ import java.util.List;
 @Service
 public class StudentService {
 
-    Logger logger = LoggerFactory.getLogger(StudentService.class);
+    private final Logger logger = LoggerFactory.getLogger(StudentService.class);
 
     @Autowired
     private final StudentRepository studentRepository;
