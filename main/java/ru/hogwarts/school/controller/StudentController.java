@@ -106,31 +106,16 @@ public class StudentController {
 
     @GetMapping("/names-starting-with-a")
     public List<String> getStudentNamesStartingWithA() {
-        return studentRepository.findAll().stream()
-                .map(Student::getName)
-                .filter(name -> name.startsWith("А"))
-                .map(String::toUpperCase)
-                .sorted()
-                .collect(Collectors.toList());
+        return studentService.getStudentNamesStartingWithA();
     }
 
     @GetMapping("/averageAge")
     public double getAverageStudentAge() {
-        return studentRepository.findAll().stream()
-                .mapToDouble(Student::getAge)
-                .average()
-                .orElse(0);
+        return studentService.getAverageStudentAge();
     }
 
     @GetMapping("/sum-parallel")
-    public ResponseEntity<Long> calculateSumParallel() {
-        logger.info("Был вызван метод для вычисления суммы с использованием параллельного потока");
-        long startTime = System.currentTimeMillis();
-        long sum = LongStream.rangeClosed(1, 1_000_000)
-                .parallel()
-                .sum();
-        long endTime = System.currentTimeMillis();
-        logger.debug("Параллельный расчёт завершён за {} мс. Результат: {}", (endTime - startTime), sum);
-        return ResponseEntity.ok(sum);
+    public long calculateSumParallel() {
+        return studentService.calculateSumParallel();
     }
 }

@@ -15,6 +15,8 @@ import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 
 @Service
@@ -121,5 +123,38 @@ public class StudentService {
         List<Student> students = studentRepository.getLastFiveStudents();
         logger.debug("Retrieved {} last students", students.size());
         return students;
+    }
+
+    public List<String> getStudentNamesStartingWithA() {
+        logger.info("Был вызван метод для получения имен студентов, начинающихся на букву А");
+
+        List<String> result = studentRepository.findAll().stream()
+                .map(Student::getName)
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .filter(name -> name.toUpperCase().startsWith("А"))
+                .map(String::toUpperCase)
+                .sorted()
+                .collect(Collectors.toList());
+
+        logger.debug("Найдено {} имен, начинающихся на А", result.size());
+        return result;
+    }
+
+    public double getAverageStudentAge() {
+        return studentRepository.findAll().stream()
+                .mapToDouble(Student::getAge)
+                .average()
+                .orElse(0);
+    }
+
+    public long calculateSumParallel() {
+        logger.info("Был вызван метод для вычисления суммы с использованием параллельного потока");
+        long startTime = System.currentTimeMillis();
+        long sum = LongStream.rangeClosed(1, 1_000_000)
+                .parallel()
+                .sum();
+        long endTime = System.currentTimeMillis();
+        logger.debug("Параллельный расчёт завершён за {} мс. Результат: {}", (endTime - startTime), sum);
+        return sum;
     }
 }
