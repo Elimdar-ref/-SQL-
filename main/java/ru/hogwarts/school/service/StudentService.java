@@ -3,9 +3,7 @@ package ru.hogwarts.school.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
@@ -156,5 +154,51 @@ public class StudentService {
         long endTime = System.currentTimeMillis();
         logger.debug("Параллельный расчёт завершён за {} мс. Результат: {}", (endTime - startTime), sum);
         return sum;
+    }
+
+    public void printStudentsParallel() {
+        List<Student> students = studentRepository.findAll();
+
+        System.out.println("Основной поток " + students.get(0).getName());
+        System.out.println("Основной поток " + students.get(1).getName());
+
+        new Thread(() -> {
+            System.out.println("Поток 1 " + students.get(2).getName());
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                System.out.println("Поток остановлен");
+                ;
+            }
+            System.out.println("Поток 1 " + students.get(3).getName());
+        }).start();
+
+        new Thread(() -> {
+            System.out.println("Поток 2 " + students.get(4).getName());
+            System.out.println("Поток 2 " + students.get(5).getName());
+        }).start();
+    }
+
+    public synchronized void printStudentsSynchronized() {
+        logger.info("Был вызван метод для печати студентов в синхронизированном режиме");
+        List<Student> students = studentRepository.findAll();
+
+        System.out.println("Основной поток " + students.get(0).getName());
+        System.out.println("Основной поток " + students.get(1).getName());
+
+        new Thread(() -> {
+            System.out.println("Поток 1 " + students.get(2).getName());
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                System.out.println("Поток остановлен");                ;
+            }
+            System.out.println("Поток 1 " + students.get(3).getName());
+        }).start();
+
+        new Thread(() -> {
+            System.out.println("Поток 2 " + students.get(4).getName());
+            System.out.println("Поток 2 " + students.get(5).getName());
+        }).start();
     }
 }

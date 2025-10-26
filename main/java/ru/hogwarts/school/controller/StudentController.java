@@ -118,4 +118,14 @@ public class StudentController {
     public long calculateSumParallel() {
         return studentService.calculateSumParallel();
     }
+
+    @GetMapping("/print-parallel")
+    public void printStudentsParallel() {
+        studentService.printStudentsParallel();
+    }
+
+    @GetMapping("/print-synchronized")
+    public void printStudentsSynchronized() {
+        studentService.printStudentsSynchronized();
+    }
 }
