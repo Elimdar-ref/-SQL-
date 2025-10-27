@@ -179,26 +179,34 @@ public class StudentService {
         }).start();
     }
 
-    public synchronized void printStudentsSynchronized() {
+    public void printStudentsSynchronized() {
         logger.info("Был вызван метод для печати студентов в синхронизированном режиме");
         List<Student> students = studentRepository.findAll();
+
+        final Object synchronous = new Object();
 
         System.out.println("Основной поток " + students.get(0).getName());
         System.out.println("Основной поток " + students.get(1).getName());
 
+
         new Thread(() -> {
-            System.out.println("Поток 1 " + students.get(2).getName());
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                System.out.println("Поток остановлен");                ;
+            synchronized (synchronous) {
+                System.out.println("Поток 1 " + students.get(2).getName());
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    System.out.println("Поток остановлен");
+                    ;
+                }
+                System.out.println("Поток 1 " + students.get(3).getName());
             }
-            System.out.println("Поток 1 " + students.get(3).getName());
         }).start();
 
         new Thread(() -> {
-            System.out.println("Поток 2 " + students.get(4).getName());
-            System.out.println("Поток 2 " + students.get(5).getName());
+            synchronized (synchronous) {
+                System.out.println("Поток 2 " + students.get(4).getName());
+                System.out.println("Поток 2 " + students.get(5).getName());
+            }
         }).start();
     }
 }
