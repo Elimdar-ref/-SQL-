@@ -1,7 +1,7 @@
 --liquibase formatted sql
 
---changeset: 1
-CREATE INDEX idx_student_name ON student(name);
+--changeset your_name:1
+CREATE INDEX IF NOT EXISTS idx_student_name ON student(name);
 
---changeset: 2
-CREATE INDEX idx_faculty_title_color ON faculty(title, color);
+--changeset your_name:2
+CREATE INDEX IF NOT EXISTS idx_faculty_title_color ON faculty(title, color);
